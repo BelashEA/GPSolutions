@@ -1,7 +1,6 @@
 package by.belash.evgeny;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -10,17 +9,17 @@ public class Main {
 
     public static void main(String[] args) {
         int attempt = 0;
-        int taskNum  = 0;
+        int taskNum = 0;
 
         String successMessage = "Программа выполнена без ошибок";
-        String errorMessage  = "Программа выполнена с ошибкой";
+        String errorMessage = "Программа выполнена с ошибкой";
 
         while (attempt == 0) {
-            System.out.println("Выберите задание: 278, 557, 579, 670");
+            System.out.println("Выберите задание: 278, 557, 5572, 579, 670");
             try {
                 Scanner in = new Scanner(System.in);
                 taskNum = in.nextInt();
-            }catch (Exception e){
+            } catch (Exception e) {
 
             }
 
@@ -29,7 +28,7 @@ public class Main {
                     task278();
                     attempt++;
                     System.out.println(successMessage);
-                }catch (Exception e){
+                } catch (Exception e) {
                     System.out.println(errorMessage);
                     e.printStackTrace();
                 }
@@ -38,7 +37,16 @@ public class Main {
                     task557();
                     attempt++;
                     System.out.println(successMessage);
-                }catch (Exception e){
+                } catch (Exception e) {
+                    System.out.println(errorMessage);
+                    e.printStackTrace();
+                }
+            } else if (taskNum == 5572) {
+                try {
+                    task557b();
+                    attempt++;
+                    System.out.println(successMessage);
+                } catch (Exception e) {
                     System.out.println(errorMessage);
                     e.printStackTrace();
                 }
@@ -47,7 +55,7 @@ public class Main {
                     task579();
                     attempt++;
                     System.out.println(successMessage);
-                }catch (Exception e){
+                } catch (Exception e) {
                     System.out.println(errorMessage);
                     e.printStackTrace();
                 }
@@ -56,7 +64,7 @@ public class Main {
                     task670();
                     attempt++;
                     System.out.println(successMessage);
-                }catch (Exception e){
+                } catch (Exception e) {
                     System.out.println(errorMessage);
                     e.printStackTrace();
                 }
@@ -67,212 +75,255 @@ public class Main {
 
     }
 
-    private static void task557() {
+    //Второй вариант решения, через одномерный массив
+    private static void task557b() throws FileNotFoundException {
         String input = "src\\files\\task557\\INPUT.TXT";
         String output = "src\\files\\task557\\OUTPUT.TXT";
 
-        short m = 0; //кол-во матриц
-        short n = 0; //размер матриц
+        Scanner sc = new Scanner(new File(input));
 
-        int row = 0;
-        int col = 0;
-        int p = 0;
+        final int m = sc.nextInt();  // количество матриц
+        final int n = sc.nextInt();  // размер матриц
+        final int line = sc.nextInt() - 1;
+        final int column = sc.nextInt() - 1;
+        final int p = sc.nextInt();
 
-        String line = null;
-        ArrayList<Short> arrayOfNumeric = new ArrayList();
+        int[] c;
+        int[][] allMatrix = new int[m][n * n];
 
-        try {
-            BufferedReader readFromFile = new BufferedReader(new FileReader(input));
-            Object[] st = readFromFile.lines().toArray();
-
-            for (int i = 0; i < st.length; i++) {
-                line = String.valueOf(st[i]);
-                Scanner scanner = new Scanner(line);
-                try {
-                    if (line.length() > 0) {
-                        while (scanner.hasNext()) {
-                            arrayOfNumeric.add(scanner.nextShort());
-                        }
-                        scanner.close();
-                    }
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
-
-            m = arrayOfNumeric.get(0);
-            arrayOfNumeric.remove(0);
-            n = arrayOfNumeric.get(0);
-            arrayOfNumeric.remove(0);
-            row = arrayOfNumeric.get(0) - 1;
-            arrayOfNumeric.remove(0);
-            col = arrayOfNumeric.get(0) - 1;
-            arrayOfNumeric.remove(0);
-            p = arrayOfNumeric.get(0);
-            arrayOfNumeric.remove(0);
-
-            readFromFile.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        ArrayList<short[][]> matrix = new ArrayList();
-
-        byte k = 0;
-        while (k < m) {
-            short[][] array = new short[n][n];
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < n; j++) {
-                    array[i][j] = arrayOfNumeric.get(0);
-                    arrayOfNumeric.remove(0);
-                }
-            }
-            matrix.add(array);
-            k++;
-        }
-
-        short[][] res = umnMatr557(matrix.get(0), matrix.get(1));
-
-        if (m > 2) {
-            matrix.remove(0);
-            matrix.remove(0);
-            for (short count = 2; count < m; count++) {
-                res = umnMatr557(res, matrix.get(0));
-                matrix.remove(0);
+        for (int j = 0; j < m; j++) {
+            for (int k = 0; k < n * n; k++) {
+                allMatrix[j][k] = sc.nextInt();
             }
         }
 
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(output));
-            writer.write(String.valueOf(res[row][col]));
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        sc.close();
+
+        c = allMatrix[0];
+        for (int i = 1; i < m; i++) {
+            c = mult(c, allMatrix[i], p, n * n, n);
         }
+        PrintWriter writer = new PrintWriter(output);
+        writer.print(c[line + column]);
+        writer.close();
     }
 
-    private static short[][] umnMatr557(short[][] mA, short[][] mB){
+    private static int[] mult(int[] a, int[] b, int p, int n, int N) {
+        int result;
+        int[] c = new int[n];
 
-        short m = (short) mA.length;
-        short n = (short) mB[0].length;
-        short o = (short) mB.length;
-        short[][] result = new short[m][n];
-
-        for (short i = 0; i < m; i++) {
-            for (short j = 0; j < n; j++) {
-                for (short k = 0; k < o; k++) {
-                    result[i][j] += mA[i][k] * mB[k][j];
+        for (int i = 0; i < n; ) {
+            int e = 0;
+            int d = 0;
+            for (int j = 0; j < n; j++) {
+                result = 0;
+                int countA = 0;
+                int countB = 0;
+                for (int k = 0; k < N; k++) {
+                    result += a[e + countA] * b[d + countB];
+                    countA++;
+                    countB += N;
+                }
+                if (result >= p) {
+                    result %= p;
+                }
+                c[i] = result;
+                i++;
+                d++;
+                if (i == N) {
+                    e += N;
+                    d = 0;
                 }
             }
         }
-        return result;
+        return c;
+    }
+
+    //Обычное перемножение матриц
+    private static void task557() throws FileNotFoundException {
+        String input = "src\\files\\task557\\INPUT.TXT";
+        String output = "src\\files\\task557\\OUTPUT.TXT";
+
+        Scanner sc = new Scanner(new File(input));
+
+        final int m = sc.nextInt();  // количество матриц
+        final int n = sc.nextInt();  // размер матриц
+        final int line = sc.nextInt() - 1;
+        final int column = sc.nextInt() - 1;
+        final int p = sc.nextInt();
+
+        int[][] c;
+        int[][][] allMatrix = new int[m][n][n];
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                for (int k = 0; k < n; k++) {
+                    allMatrix[i][j][k] = sc.nextInt();
+                }
+            }
+        }
+        sc.close();
+
+        c = allMatrix[0];
+
+        for (int i = 1; i < m; i++) {
+            c = umnMatr557(c, allMatrix[i], p, n);
+        }
+        PrintWriter writer = new PrintWriter(output);
+        writer.print(c[line][column]);
+        writer.close();
+    }
+
+    public static int[][] umnMatr557(int[][] a, int[][] b, int p, int n) {
+        int result;
+        int[][] c = new int[n][n];
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                result = 0;
+                for (int k = 0; k < n; k++) {
+                    result += a[i][k] * b[k][j];
+                }
+                if (result >= p) {
+                    result %= p;
+                }
+                c[i][j] = result;
+            }
+        }
+        return c;
     }
 
 
-    private static void task278(){
+    private static void task278() throws FileNotFoundException {
         String input = "src\\files\\task278\\INPUT.TXT";
         String output = "src\\files\\task278\\OUTPUT.TXT";
 
         String s = null;
         String t = null;
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(input), StandardCharsets.UTF_8))){
-            s = reader.readLine();
-            t = reader.readLine();
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        char[] arrS = null;
+        char[] arrT = null;
+        PrintWriter writer = new PrintWriter(new File((output)));
+        try {
+            Scanner sc = new Scanner(new File(input));
+            if (sc.hasNext()) {
+                s = sc.next().toUpperCase();
+                arrS = s.toCharArray();
+            }
+            if (sc.hasNext()) {
+                t = sc.next().toUpperCase();
+                arrT = t.toCharArray();
+            }
+            sc.close();
+        } catch (IOException p) {
+            writer.print("NO");
+            writer.close();
         }
 
-        char[] arrS = s.toCharArray();
-        char[] arrT = t.toCharArray();
-        int x = t.indexOf(arrS[0]);
-        if (x < 0){
-            System.out.println("NO");
-        }else {
-            int i = 1;
-            for (int j = x + 1; j < arrT.length; j++) {
-                if (arrS[i] == arrT[j]) {
-                    i++;
-                }
-                if (i == arrS.length) {
-                    break;
-                }
-            }
 
-            try {
-                BufferedWriter writer = new BufferedWriter(new FileWriter(output));
-                if (i == arrS.length) {
-                    writer.write("YES");
-                } else writer.write("NO");
+        try {
+            if (isIn(arrS, arrT, s, t) & t.length() > 0 & s.length() > 0) {
+                writer.print("YES");
                 writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } else {
+                writer.print("NO");
+                writer.close();
             }
-
+        } catch (Exception e) {
+            writer.print("NO");
+            writer.close();
         }
     }
+
+    public static boolean isIn(char[] arrS, char[] arrT, String s, String t) {
+        int x = -1;
+        if (t.length() > 0 & s.length() > 0 & arrS.length > 0 & arrT.length > 0) {
+            x = t.indexOf(arrS[0]);
+        }
+
+        if (x >= 0) {
+            int z = 1;
+            for (int j = x + 1; j < arrT.length; j++) {
+                if (arrS[z] == arrT[j]) {
+                    z++;
+                }
+                if (z == arrS.length) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 
     private static void task579() {
         String input = "src\\files\\task579\\INPUT.TXT";
         String output = "src\\files\\task579\\OUTPUT.TXT";
 
-        short n = 0;
-        short[] array;
-        String str = null;
+        int n = 0;
+        int[] array;
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(input)))) {
-            n = Short.parseShort(reader.readLine());
-            str = reader.readLine();
-            reader.close();
-        } catch (IOException e) {
+        Scanner reader = null;
+        try {
+            reader = new Scanner(new File(input));
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
-        array = new short[n];
-        Scanner scanner = new Scanner(str);
-        for (short i = 0; i < n; i++) {
-            array[i] = scanner.nextShort();
+        n = reader.nextInt();
+        array = new int[n];
+        for (int i = 0; i < n; i++) {
+            array[i] = reader.nextInt();
         }
-        scanner.close();
+        reader.close();
 
         int sumPol = 0;
         int sumOtr = 0;
         int countPol = 0;
         int countOrt = 0;
 
-        for (short i = 0; i < array.length; i++) {
-            if (array[i] > 0) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] >= 0) {
                 sumPol = sumPol + array[i];
                 countPol++;
-            } else {
+            } else if (array[i] < 0) {
                 sumOtr = sumOtr + array[i];
                 countOrt++;
             }
         }
+
+        PrintWriter writer = null;
         try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(output));
-            if (sumPol >= Math.abs(sumOtr)) {
-                writer.write(String.valueOf(countPol));
-                writer.write(System.lineSeparator());
-                for (short i = 0; i < array.length; i++) {
-                    if (array[i] >= 0) {
-                        writer.write(i + 1 + " ");
-                    }
-                }
-            } else {
-                writer.write(String.valueOf(countOrt));
-                writer.write(System.lineSeparator());
-                for (short i = 0; i < array.length; i++) {
-                    if (array[i] < 0) {
-                        writer.write(i + 1 + " ");
-                    }
-                }
-            }
-            writer.close();
-        } catch (IOException e) {
+            writer = new PrintWriter(new File(output));
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+
+        ArrayList<Integer> arrayList = new ArrayList();
+
+        if (sumPol >= Math.abs(sumOtr)) {
+            writer.print(countPol);
+            writer.print(System.lineSeparator());
+            for (int i = 0; i < array.length; i++) {
+                if (array[i] >= 0) {
+                    arrayList.add(i + 1);
+                }
+            }
+        } else {
+            writer.print(countOrt);
+            writer.write(System.lineSeparator());
+            for (int i = 0; i < array.length; i++) {
+                if (array[i] < 0) {
+                    arrayList.add(i + 1);
+                }
+            }
+        }
+
+        for (int i = 0; i < arrayList.size() - 1; i++) {
+            writer.print(arrayList.get(i));
+            writer.print(" ");
+        }
+        writer.print(arrayList.get(arrayList.size() - 1));
+        writer.close();
     }
 
 
