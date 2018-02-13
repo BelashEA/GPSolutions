@@ -49,7 +49,6 @@ public class Main {
                     System.out.println(successMessage);
                 } catch (Exception e) {
                     System.out.println(errorMessage);
-                    e.printStackTrace();
                 }
 
             } else {
@@ -169,7 +168,7 @@ public class Main {
             try {
                 result = engine.eval(substring);
             } catch (ScriptException e) {
-                e.printStackTrace();
+                System.out.println("Не валидные данные");
             }
 
             line = line.replace(substring, result.toString());
@@ -214,7 +213,7 @@ public class Main {
             try {
                 line = String.valueOf(engine.eval(line));
             } catch (ScriptException e) {
-                e.printStackTrace();
+                System.out.println("Не валидные данные");
             }
         }
 
